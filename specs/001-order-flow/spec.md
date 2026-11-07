@@ -88,7 +88,7 @@ Can be fully tested by submitting a multi-item order where stock for an add-in o
 
 1. **Given** store `SB-10482` where the menu displays oat milk as in stock with 1 available carton remaining when the customer selects an Oat Milk Latte with add-in `vanilla_syrup`,
    **When** concurrent orders claim the 1 remaining carton and the customer proceeds to checkout to place the order,
-   **Then** the Order Service checks stock with the Store Stock Service, finds 0 cartons remaining (`available_stock = 0`), refuses the order before payment with exact refusal reason: `"Order refused: Insufficient stock for component 'oat_milk' at store SB-10482"`, and takes no payment.
+   **Then** the Order Service checks stock with the Store Stock Service, finds 0 cartons remaining (`available_stock = 0`), refuses the order before payment with exact refusal reason: `"Order refused: Insufficient stock for component 'oat_milk' at store SB-10482"`, immediately releases all reservations previously held for that order ticket so no stock remains orphaned, and takes no payment.
 2. **Given** store `SB-10482` where oat milk has only 1 unreserved carton remaining (`quantity_on_hand - reserved_quantity = 1`),
    **When** a customer submits an order containing 2 Oat Milk Lattes with add-in `caramel_drizzle` in the same ticket at store `SB-10482`,
    **Then** the Order Service attempts to hold the required milk and add-ins, detects that stock runs out mid-order, refuses the order before payment with exact refusal reason: `"Order refused: Insufficient stock for component 'oat_milk' at store SB-10482"`, and rolls back any holds.
