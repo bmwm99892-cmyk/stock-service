@@ -8,3 +8,4 @@ htmlcov/
 .git_commit_msg.txt
 commit_msg_update.txt
 commit_msg_combined.txt
+commit_msg_constraints.txt
