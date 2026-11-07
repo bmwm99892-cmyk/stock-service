@@ -107,7 +107,8 @@ class StockRepository:
     ) -> list[ComponentStock]:
         """Return component stock records for a store.
 
-        Calculates availability using placeholder rule.
+        Calculates availability using reserved-stock availability rule:
+        available_stock = quantity_on_hand - reserved_quantity > 0.
         """
         self.ensure_loaded()
         normalized_store_id = str(store_id).strip()

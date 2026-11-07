@@ -17,6 +17,9 @@ def is_component_available(
     Check: Compared the First Hill oat milk row in the CSV against the snapshot: quantity_on_hand = 0, reserved_quantity = 0, so available stock = 0 and the rule returns sold out, matching the test assertion.
     Correction: The illustrative 3-carton example is not actual First Hill oat milk inventory.
     """
-    # Rule: A milk is available only when quantity_on_hand - reserved_quantity > 0; otherwise it is sold out.
-    # During the 7 a.m. rush, reserved cartons must not be sold to new customers, even if unpaid, to prevent overselling.
-    return (quantity_on_hand - reserved_quantity) > 0
+    # Rule: available_stock = quantity_on_hand - reserved_quantity
+    # A milk is available only when available_stock > 0; otherwise it is sold out.
+    # Reserved cartons must be excluded from stock available to new customers during the 7 a.m. rush,
+    # even if they have not been paid for yet, to prevent overselling.
+    available_stock = quantity_on_hand - reserved_quantity
+    return available_stock > 0

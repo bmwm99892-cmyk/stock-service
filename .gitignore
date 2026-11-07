@@ -6,3 +6,4 @@ __pycache__/
 .coverage
 htmlcov/
 .git_commit_msg.txt
+commit_msg_update.txt

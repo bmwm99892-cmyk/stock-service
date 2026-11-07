@@ -56,8 +56,8 @@ def test_get_store_stock_success(client, snapshot_data):
         assert item["quantity_on_hand"] == int(matching_row["quantity_on_hand"])
         assert item["reserved_quantity"] == int(matching_row["reserved_quantity"])
 
-        # Check placeholder rule consistency
-        expected_availability = item["quantity_on_hand"] > item["reserved_quantity"]
+        # Check reserved-stock availability rule consistency (available_stock = quantity_on_hand - reserved_quantity > 0)
+        expected_availability = (item["quantity_on_hand"] - item["reserved_quantity"]) > 0
         assert item["available"] == expected_availability
 
 

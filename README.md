@@ -3,8 +3,9 @@
 A FastAPI microservice that loads Starbucks store stock from `starbucks_store_stock_snapshot_2025-03-07.csv` and exposes real-time stock levels and component availability.
 
 ## Availability Rule
-> **Rule**: A milk is available when `quantity_on_hand` minus `reserved_quantity` is above 0, otherwise it is sold out.
-> **Reason**: During the 7 a.m. rush, customers need accurate stock information. A carton held for another customer's order counts as reserved even if unpaid, preventing overselling.
+> **Rule**: `available_stock = quantity_on_hand - reserved_quantity`. A milk is available only when `available_stock > 0`; otherwise it is sold out.
+> **Reason**: Reserved cartons must be excluded from stock available to new customers during the 7 a.m. rush, even if they have not been paid for yet, to prevent overselling.
+> **First Hill Snapshot Check**: Store ID `10482`, oat milk: `quantity_on_hand` = 0, `reserved_quantity` = 0, `available_stock` = 0 $\rightarrow$ sold out (`available: False`). Note: The illustrative 3-carton example is test data, not actual First Hill inventory.
 
 ## Setup & Virtual Environment
 
