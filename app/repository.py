@@ -97,10 +97,21 @@ class StockRepository:
             except FileNotFoundError as err:
                 logger.warning("Snapshot CSV file not found: %s. Returning empty inventory.", err)
 
+    def _normalize_store_id(self, store_id: str) -> str:
+        """Normalize store ID, supporting both plain format (10482) and prefix (SB-10482)."""
+        clean = str(store_id).strip()
+        if clean in self._stores:
+            return clean
+        if clean.upper().startswith("SB-"):
+            stripped = clean[3:].strip()
+            if stripped in self._stores:
+                return stripped
+        return clean
+
     def store_exists(self, store_id: str) -> bool:
         """Check if store_id exists in snapshot."""
         self.ensure_loaded()
-        return str(store_id).strip() in self._stores
+        return self._normalize_store_id(store_id) in self._stores
 
     def component_exists_anywhere(self, component_id: str) -> bool:
         """Check if component_id exists anywhere in the snapshot."""
@@ -116,7 +127,7 @@ class StockRepository:
         available_stock = quantity_on_hand - reserved_quantity > 0.
         """
         self.ensure_loaded()
-        normalized_store_id = str(store_id).strip()
+        normalized_store_id = self._normalize_store_id(store_id)
         if normalized_store_id not in self._stores:
             return []
 
@@ -156,7 +167,7 @@ class StockRepository:
     def get_store_metadata(self, store_id: str) -> Optional[dict]:
         """Return store metadata if present."""
         self.ensure_loaded()
-        return self._store_metadata.get(str(store_id).strip())
+        return self._store_metadata.get(self._normalize_store_id(store_id))
 
 
 # Default repository instance

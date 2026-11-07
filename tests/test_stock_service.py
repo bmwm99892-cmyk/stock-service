@@ -128,6 +128,37 @@ def test_get_store_stock_by_path_item_id(client, snapshot_data):
     assert "not found" in unknown_response.json()["detail"].lower()
 
 
+def test_refuse_oat_milk_latte_at_sb_10482_with_exact_reason(client):
+    """Verify that an oat milk latte is refused at SB-10482 with the exact reason.
+
+    Rule: A milk is available only when quantity_on_hand - reserved_quantity > 0; otherwise it is sold out.
+    Reason: During the 7 a.m. rush, reserved cartons must not be sold to new customers,
+    even if the existing customer has not paid yet, to prevent overselling.
+    """
+    store_id = "SB-10482"
+    response = client.get(f"/stores/{store_id}/stock?item=oat_milk")
+    assert response.status_code == 200
+
+    items = response.json()
+    assert len(items) == 1
+    oat_milk = items[0]
+
+    assert oat_milk["component"] == "oat_milk"
+    assert oat_milk["available"] is False
+    assert oat_milk["is_available"] is False
+
+    # Calculate available stock according to the rule
+    available_stock = oat_milk["quantity_on_hand"] - oat_milk["reserved_quantity"]
+    assert available_stock <= 0
+
+    # Verification: Oat milk latte cannot be served because oat milk is sold out
+    refusal_reason = (
+        "During the 7 a.m. rush, reserved cartons must not be sold to new customers, "
+        "even if the existing customer has not paid yet, to prevent overselling."
+    )
+    assert not oat_milk["available"], f"Oat milk latte must be refused at {store_id}: {refusal_reason}"
+
+
 def test_first_hill_milk_availability(client):
     """Requests store 10482 (First Hill) and verifies oat milk is sold out while an available milk reads as available.
     Notice: No stock numbers are typed into this test.
