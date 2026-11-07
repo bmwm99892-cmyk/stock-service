@@ -86,12 +86,15 @@ Can be fully tested by submitting a multi-item order where stock for an add-in o
 
 **Acceptance Scenarios**:
 
-1. **Given** store `SB-10482` where oat milk has only 1 unreserved carton remaining (`quantity_on_hand - reserved_quantity = 1`),
+1. **Given** store `SB-10482` where the menu displays oat milk as in stock when the customer selects an Oat Milk Latte with add-in `vanilla_syrup`,
+   **When** concurrent orders deplete all available cartons and the customer proceeds to checkout to place the order,
+   **Then** the Order Service checks stock with the Store Stock Service, finds none left, refuses the order before payment with exact refusal reason: `"Order refused: Insufficient stock for component 'oat_milk' at store SB-10482"`, and takes no payment.
+2. **Given** store `SB-10482` where oat milk has only 1 unreserved carton remaining (`quantity_on_hand - reserved_quantity = 1`),
    **When** a customer submits an order containing 2 Oat Milk Lattes with add-in `caramel_drizzle` in the same ticket at store `SB-10482`,
-   **Then** the Order Service attempts to hold the required milk and add-ins, detects that stock runs out mid-order, refuses the order before payment with exact refusal reason: `"Order refused: A component (milk) is available only when available_stock = quantity_on_hand - reserved_quantity > 0; otherwise it is sold out (available: False). Insufficient stock for component 'oat_milk' at store SB-10482 (requested: 2, available: 1)"`, and rolls back any holds.
-2. **Given** store `SB-10482` where Drink 1 (Iced Espresso with add-in `vanilla_sweet_cream_cold_foam`) has available stock, but Drink 2 (Oat Milk Latte with add-in `caramel_drizzle`) has `available_stock = 0` for oat milk,
+   **Then** the Order Service attempts to hold the required milk and add-ins, detects that stock runs out mid-order, refuses the order before payment with exact refusal reason: `"Order refused: Insufficient stock for component 'oat_milk' at store SB-10482"`, and rolls back any holds.
+3. **Given** store `SB-10482` where Drink 1 (Iced Espresso with add-in `vanilla_sweet_cream_cold_foam`) has available stock, but Drink 2 (Oat Milk Latte with add-in `caramel_drizzle`) has `available_stock = 0` for oat milk,
    **When** a customer submits the combined order at store `SB-10482`,
-   **Then** the Order Service detects oat milk is sold out mid-order, immediately releases the reservation holds from Drink 1, and refuses the order before payment with exact refusal reason: `"Order refused: A component (milk) is available only when available_stock = quantity_on_hand - reserved_quantity > 0; otherwise it is sold out (available: False). Component 'oat_milk' at store SB-10482 is sold out."`.
+   **Then** the Order Service detects oat milk is sold out mid-order, immediately releases the reservation holds from Drink 1, and refuses the order before payment with exact refusal reason: `"Order refused: Insufficient stock for component 'oat_milk' at store SB-10482"`.
 
 ---
 
