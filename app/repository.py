@@ -88,9 +88,14 @@ class StockRepository:
         )
 
     def ensure_loaded(self) -> None:
-        """Ensure snapshot is loaded before querying."""
+        """Ensure snapshot is loaded before querying.
+        If file is missing, logs a warning instead of halting service.
+        """
         if not self._is_loaded:
-            self.load_from_csv()
+            try:
+                self.load_from_csv()
+            except FileNotFoundError as err:
+                logger.warning("Snapshot CSV file not found: %s. Returning empty inventory.", err)
 
     def store_exists(self, store_id: str) -> bool:
         """Check if store_id exists in snapshot."""

@@ -149,6 +149,19 @@ def test_first_hill_milk_availability(client):
     assert items_by_component["almond_milk"]["available"] is True
 
 
+def test_missing_csv_file_logs_warning_and_does_not_crash(caplog):
+    """Verify that if the snapshot CSV file is missing, a warning is logged instead of stopping or crashing."""
+    import logging
+    from app.repository import StockRepository
+
+    missing_repo = StockRepository(Path("non_existent_snapshot_file_2099.csv"))
+    with caplog.at_level(logging.WARNING):
+        missing_repo.ensure_loaded()
+        assert missing_repo.store_exists("10482") is False
+
+    assert any("not found" in record.message.lower() for record in caplog.records)
+
+
 def test_milk_availability_rule():
     """Verify reserved-stock milk availability rule: available only when on_hand - reserved > 0.
     Note: These numbers are illustrative unit test fixtures, not actual First Hill oat milk inventory.

@@ -1,3 +1,4 @@
+import logging
 from contextlib import asynccontextmanager
 from typing import Optional
 
@@ -6,6 +7,8 @@ from fastapi import FastAPI, HTTPException, Query, status
 from app.models import ComponentStock
 from app.repository import stock_repository
 
+logger = logging.getLogger(__name__)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -13,8 +16,11 @@ async def lifespan(app: FastAPI):
     try:
         stock_repository.load_from_csv()
     except FileNotFoundError as err:
-        # Avoid crashing completely if file path is missing; logged clearly
-        print(f"Warning on startup: {err}")
+        # Avoid crashing or stopping the service if CSV is missing; log a warning instead
+        logger.warning(
+            "Warning on startup: Stock snapshot file was not found (%s). Service is running with empty stock.",
+            err,
+        )
     yield
 
 
