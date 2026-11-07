@@ -131,6 +131,8 @@ def test_get_store_stock_by_path_item_id(client, snapshot_data):
 def test_first_hill_milk_availability(client):
     """Requests store 10482 (First Hill) and verifies oat milk is sold out while an available milk reads as available.
     Notice: No stock numbers are typed into this test.
+    Rule check: First Hill oat milk has quantity_on_hand=0, reserved_quantity=0 in the snapshot,
+    so available stock=0 which returns sold out (False).
     """
     store_id = "10482"
     response = client.get(f"/stores/{store_id}/stock")
@@ -138,7 +140,7 @@ def test_first_hill_milk_availability(client):
 
     items_by_component = {item["component"]: item for item in response.json()}
 
-    # Assert oat milk is sold out at First Hill
+    # Assert oat milk is sold out at First Hill (quantity_on_hand=0, reserved_quantity=0 -> sold out)
     assert "oat_milk" in items_by_component
     assert items_by_component["oat_milk"]["available"] is False
 
@@ -148,7 +150,9 @@ def test_first_hill_milk_availability(client):
 
 
 def test_milk_availability_rule():
-    """Verify milk availability rule: available when quantity_on_hand minus reserved_quantity is above 0, otherwise sold out."""
+    """Verify reserved-stock milk availability rule: available only when on_hand - reserved > 0.
+    Note: These numbers are illustrative unit test fixtures, not actual First Hill oat milk inventory.
+    """
     # When available stock is above zero -> True
     assert is_component_available(quantity_on_hand=int("10"), reserved_quantity=int("5"), component_id="oat_milk") is True
     # When available stock equals zero -> False (sold out)

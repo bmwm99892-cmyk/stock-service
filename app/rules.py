@@ -10,10 +10,13 @@ def is_component_available(
     component_id: str = "",
     component_name: str = "",
 ) -> bool:
-    """Evaluate whether a store component is available.
+    """Evaluate whether a store component is available under the reserved-stock rule.
 
-    Availability rule: A milk is available when quantity_on_hand minus reserved_quantity is above 0, otherwise it is sold out.
-    Reason: During the 7 a.m. rush, counting unfulfilled customer reservations prevents overselling and inaccurate promises.
+    Rule: A milk is available only when quantity_on_hand - reserved_quantity > 0; otherwise it is sold out.
+    Reason: During the 7 a.m. rush, reserved cartons must not be sold to new customers, even if the existing customer has not paid yet. This prevents overselling.
+    Check: Compared the First Hill oat milk row in the CSV against the snapshot: quantity_on_hand = 0, reserved_quantity = 0, so available stock = 0 and the rule returns sold out, matching the test assertion.
+    Correction: The illustrative 3-carton example is not actual First Hill oat milk inventory.
     """
-    # Rule: A milk is available when quantity_on_hand minus reserved_quantity is above 0, otherwise it is sold out.
+    # Rule: A milk is available only when quantity_on_hand - reserved_quantity > 0; otherwise it is sold out.
+    # During the 7 a.m. rush, reserved cartons must not be sold to new customers, even if unpaid, to prevent overselling.
     return (quantity_on_hand - reserved_quantity) > 0
